@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kỷ Niệm - Ảnh Album | Lưu giữ khoảnh khắc</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- Màn hình đăng nhập/đăng ký -->
+<div id="authScreen" class="auth-screen">
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>📸 Góc Kỷ Niệm</h1>
+            <p>Lưu giữ những khoảnh khắc đáng nhớ</p>
+        </div>
+        
+        <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="login">Đăng nhập</button>
+            <button class="auth-tab" data-tab="register">Đăng ký</button>
+        </div>
+        
+        <!-- Form đăng nhập -->
+        <div id="loginForm" class="auth-form active">
+            <div class="form-group">
+                <label>👤 Tên đăng nhập</label>
+                <input type="text" id="loginUsername" placeholder="Nhập tên đăng nhập" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label>🔒 Mật khẩu</label>
+                <input type="password" id="loginPassword" placeholder="Nhập mật khẩu" autocomplete="current-password">
+            </div>
+            <button id="loginBtn" class="btn btn-primary btn-block">Đăng nhập</button>
+            <div class="auth-message" id="authMessage"></div>
+        </div>
+        
+        <!-- Form đăng ký -->
+        <div id="registerForm" class="auth-form">
+            <div class="form-group">
+                <label>👤 Tên đăng nhập</label>
+                <input type="text" id="regUsername" placeholder="Tên đăng nhập (3-20 ký tự)" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label>🔒 Mật khẩu</label>
+                <input type="password" id="regPassword" placeholder="Mật khẩu (ít nhất 6 ký tự)" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label>🔒 Xác nhận mật khẩu</label>
+                <input type="password" id="regConfirmPassword" placeholder="Nhập lại mật khẩu">
+            </div>
+            <div class="form-group">
+                <label>📝 Tên hiển thị</label>
+                <input type="text" id="regDisplayName" placeholder="Tên của bạn (tùy chọn)">
+            </div>
+            <button id="registerBtn" class="btn btn-primary btn-block">Đăng ký</button>
+        </div>
+    </div>
+</div>
+
+<!-- Ứng dụng chính (sau khi đăng nhập) -->
+<div id="mainApp" style="display: none;">
+    <div class="app-container">
+        <!-- Header với thông tin người dùng -->
+        <div class="user-header">
+            <div class="user-info">
+                <span class="user-avatar">👤</span>
+                <span id="userDisplayName" class="user-name"></span>
+            </div>
+            <button id="logoutBtn" class="btn btn-outline btn-sm">🚪 Đăng xuất</button>
+        </div>
+
+        <div class="hero">
+            <h1>📸 Góc Kỷ Niệm</h1>
+            <p>Lưu giữ những khoảnh khắc đáng nhớ — Album ảnh không bao giờ mất</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="album-actions">
+                <button id="createAlbumBtn" class="btn btn-primary">✨ Tạo Album mới</button>
+                <button id="manageAlbumsBtn" class="btn btn-outline">📁 Quản lý Album</button>
+            </div>
+            <div class="stats">
+                📊 <span id="albumCount">0</span> album · 🖼️ <span id="photoCount">0</span> ảnh
+            </div>
+        </div>
+
+        <!-- Thêm ảnh mới -->
+        <div class="upload-panel">
+            <div class="upload-form">
+                <div class="form-group" style="flex:2">
+                    <label>📷 Tải ảnh lên (hỗ trợ nhiều ảnh cùng lúc)</label>
+                    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" multiple>
+                </div>
+                <div class="form-group">
+                    <label>🖼️ Tiêu đề (tùy chọn)</label>
+                    <input type="text" id="photoTitle" placeholder="VD: Biển chiều, phố cổ...">
+                </div>
+                <div class="form-group">
+                    <label>📁 Chọn Album</label>
+                    <select id="albumSelectUpload"></select>
+                </div>
+                <div class="form-group">
+                    <button id="uploadBtn" class="btn btn-primary">➕ Đăng ảnh</button>
+                </div>
+            </div>
+            <div id="uploadMessage" class="upload-message"></div>
+        </div>
+
+        <!-- Danh sách album tabs -->
+        <div class="albums-header">
+            <h3>📚 Danh sách Album của bạn</h3>
+            <button id="expandAllBtn" class="btn-small">📂 Mở rộng tất cả</button>
+        </div>
+        <div id="albumTabsContainer" class="album-tabs"></div>
+
+        <!-- Hiển thị ảnh theo album -->
+        <div id="photosContainer" class="photo-grid"></div>
+    </div>
+
+    <!-- Modal quản lý album -->
+    <div id="manageAlbumsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>📁 Quản lý Album</h2>
+                <span class="close-modal close-manage">&times;</span>
+            </div>
+            <div class="manage-albums-content">
+                <div class="create-album-section">
+                    <input type="text" id="newAlbumNameInput" placeholder="Nhập tên album mới..." class="album-input">
+                    <button id="createAlbumFromModalBtn" class="btn btn-primary">➕ Tạo Album</button>
+                </div>
+                <div id="albumsList" class="albums-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal chỉnh sửa album -->
+    <div id="editAlbumModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Chỉnh sửa Album</h2>
+                <span class="close-modal close-edit">&times;</span>
+            </div>
+            <div class="edit-album-content">
+                <input type="text" id="editAlbumNameInput" placeholder="Tên album" class="album-input">
+                <div class="modal-buttons">
+                    <button id="saveEditAlbumBtn" class="btn btn-primary">💾 Lưu thay đổi</button>
+                    <button id="cancelEditBtn" class="btn btn-outline">Hủy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal preview ảnh -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal close-image">&times;</span>
+            <img id="modalImage" class="modal-img" alt="preview">
+            <div class="modal-image-info" id="modalImageInfo"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>✨ Ảnh của bạn được lưu trữ an toàn trong trình duyệt. Tạo nhiều album, thêm nhiều ảnh, không lo mất dữ liệu.</p>
+        <p>💡 Mẹo: Bạn có thể tạo không giới hạn số lượng album và ảnh!</p>
+    </footer>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
